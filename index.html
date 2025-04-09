@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>啊啊啊啊啊一塊錢</title>
+</head>
+<body>
+    <h1 id="pageTitle">1塊錢播放器</h1>
+
+    <div>
+        <label for="count">你要幾塊錢：</label>
+        <input type="number" id="count" min="1" value="1">
+        <button id="multiPlayBtn">播放</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button id="singlePlayBtn">播放一塊錢</button>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let audioBuffer = null;
+
+        // 載入 dollar.mp3 音檔
+        fetch('dollar.mp3')
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+            .then(decodedAudio => {
+                audioBuffer = decodedAudio;
+                console.log('音檔載入完成');
+            })
+            .catch(err => {
+                console.error('無法載入音檔:', err);
+            });
+
+        function playSound() {
+            if (!audioBuffer) {
+                console.warn('音檔尚未載入完成');
+                return;
+            }
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+        }
+
+        document.getElementById('singlePlayBtn').addEventListener('click', () => {
+            const label = '一塊錢';
+            document.title = `啊啊啊啊啊${label}`;
+            playSound();
+        });
+
+        document.getElementById('multiPlayBtn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('count').value, 10);
+            if (isNaN(count) || count < 1) {
+                alert('請輸入有效的數字');
+                return;
+            }
+
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    playSound();
+                }, 500);
+            }
+        });
+
+        const countInput = document.getElementById('count');
+        const pageTitle = document.getElementById('pageTitle');
+
+        function updateLabels(count) {
+            const label = isNaN(count) || count < 1 ? '一塊錢' : `${count} 塊錢`;
+            document.title = `啊啊啊啊啊${label.replace(' ', '')}`;
+            pageTitle.textContent = `${label.replace(' ', '')}播放器`;
+        }
+
+        countInput.addEventListener('input', () => {
+            const count = parseInt(countInput.value, 10);
+            updateLabels(count);
+        });
+
+        // 頁面一載入就設定初始標題
+        updateLabels(parseInt(countInput.value, 10));
+    </script>
+</body>
+</html>
