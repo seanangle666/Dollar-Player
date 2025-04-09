@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Audio API 播放 MP3 範例</title>
+</head>
+<body>
+    <h1>Web Audio API 播放 MP3 範例</h1>
+    <label for="count">輸入播放次數：</label>
+    <input type="number" id="count" min="1" value="1">
+    <button id="playButton">播放</button>
+
+    <script>
+        // 創建音頻上下文
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // 載入音頻檔案
+        let audioBuffer;
+
+        // 使用 fetch 來載入 dollar.mp3
+        fetch('dollar.mp3')
+            .then(response => response.arrayBuffer())
+            .then(data => {
+                return audioContext.decodeAudioData(data);
+            })
+            .then(decodedData => {
+                audioBuffer = decodedData;
+            })
+            .catch(error => {
+                console.error('載入音頻檔案失敗:', error);
+            });
+
+        // 播放音頻
+        function playSound() {
+            if (audioBuffer) {
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.start();
+            } else {
+                console.error('音頻檔案尚未載入');
+            }
+        }
+
+        // 播放按鈕的事件監聽器
+        document.getElementById('playButton').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('count').value, 10);
+            if (isNaN(count) || count < 1) {
+                alert('請輸入有效的數字');
+                return;
+            }
+
+            // 根據輸入的次數播放音頻
+            for (let i = 0; i < count; i++) {
+                setTimeout(playSound, i * 2000);  // 每次延遲播放2秒
+            }
+        });
+    </script>
+</body>
+</html>
